@@ -1,0 +1,164 @@
+name: Windows RDP → Tailscale (RETRO VAPORWAVE + SİYAH TEMA + TÜRKÇE)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rdp:
+    runs-on: windows-latest
+    steps:
+      - name: Setup Environment
+        shell: pwsh
+        run: |
+          function Enable-RDP {
+              Write-Host "💻 RDP Aktifleştiriliyor..." -ForegroundColor Cyan
+              Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+              Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+              net user runneradmin GitHub123!
+              Write-Host "✅ RDP Aktif!" -ForegroundColor Green
+          }
+
+          function Setup-LocaleAndTime {
+              Write-Host "🌐 Türkçe Dil ve Saat Ayarlanıyor..." -ForegroundColor Cyan
+              Set-WinSystemLocale -SystemLocale tr-TR
+              Set-WinUserLanguageList tr-TR -Force
+              Set-Culture tr-TR
+              Set-TimeZone -Id "Turkey Standard Time"
+              Write-Host "✅ Dil ve Saat Ayarlandı!" -ForegroundColor Green
+          }
+
+          function Apply-ThemeAndWallpaper {
+              Write-Host "🎨 Siyah Tema ve Retro Wallpaper Uygulanıyor..." -ForegroundColor Cyan
+              # Güç ayarları
+              powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
+              powercfg /change standby-timeout-ac 0
+              powercfg /change hibernate-timeout-ac 0
+              powercfg /change monitor-timeout-ac 0
+
+              # Siyah tema
+              Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme" -Value 0 -Type DWord -Force
+              Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "SystemUsesLightTheme" -Value 0 -Type DWord -Force
+              Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+              Start-Sleep -Seconds 2
+              Start-Process explorer.exe -WindowStyle Hidden
+
+              # Wallpaper
+              $wallpaper = "$env:TEMP\retro-vaporwave.png"
+              iwr "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEihU5ELZHXpfukyPseIKOld_KrjmfnmBCqeI0KaPz_O0bnAheFHkUlAtPoQzJxoO5bvif-3iVROvgljui47gteW2BJ3g8d1DwOSg2aKYYwULYVqAZRPCVGJ__MThLnzuVr2MUM24tVI29rK/s1920/13082021-RETRO-HD.png" -OutFile $wallpaper
+              Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "Wallpaper" -Value $wallpaper -Type String -Force
+              Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "WallpaperStyle" -Value 2 -Type String -Force
+              Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "TileWallpaper" -Value 0 -Type String -Force
+              1..5 | ForEach-Object { RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters; Start-Sleep -Milliseconds 500 }
+              Write-Host "✅ Tema ve Wallpaper Tamamlandı!" -ForegroundColor Green
+          }
+
+          function Install-Tailscale {
+              Write-Host "🌐 Tailscale Kuruluyor..." -ForegroundColor Cyan
+              iwr https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi -OutFile t.msi
+              Start-Process msiexec.exe -ArgumentList '/i t.msi /quiet /norestart' -Wait
+              Write-Host "✅ Tailscale Kuruldu!" -ForegroundColor Green
+          }
+
+          function Start-Tailscale {
+              param($authkey)
+              Write-Host "🚀 Tailscale Başlatılıyor..." -ForegroundColor Cyan
+              Start-Process "C:\Program Files\Tailscale\tailscaled.exe" -ArgumentList '--state=mem:' -WindowStyle Hidden
+              Start-Sleep -Seconds 15
+              & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=$authkey --accept-routes --accept-dns=false
+              Write-Host "✅ Tailscale Bağlandı!" -ForegroundColor Green
+
+              while ($true) {
+                  $ip = & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+                  if ($ip) { Write-Host "[$(Get-Date)] Tailscale IP → $ip" -ForegroundColor Yellow }
+                  Start-Sleep -Seconds 300
+              }
+          }
+
+          # Fonksiyonları çağır
+          Enable-RDP
+          Setup-LocaleAndTime
+          Apply-ThemeAndWallpaper
+          Install-Tailscale
+          Start-Tailscale -authkey $env:TAILSCALE_AUTHKEY
+name: Windows RDP → Tailscale (RETRO VAPORWAVE + SİYAH TEMA + TÜRKÇE)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rdp:
+    runs-on: windows-latest
+    steps:
+      - name: Setup Environment
+        shell: pwsh
+        run: |
+          function Enable-RDP {
+              Write-Host "💻 RDP Aktifleştiriliyor..." -ForegroundColor Cyan
+              Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+              Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+              net user runneradmin GitHub123!
+              Write-Host "✅ RDP Aktif!" -ForegroundColor Green
+          }
+
+          function Setup-LocaleAndTime {
+              Write-Host "🌐 Türkçe Dil ve Saat Ayarlanıyor..." -ForegroundColor Cyan
+              Set-WinSystemLocale -SystemLocale tr-TR
+              Set-WinUserLanguageList tr-TR -Force
+              Set-Culture tr-TR
+              Set-TimeZone -Id "Turkey Standard Time"
+              Write-Host "✅ Dil ve Saat Ayarlandı!" -ForegroundColor Green
+          }
+
+          function Apply-ThemeAndWallpaper {
+              Write-Host "🎨 Siyah Tema ve Retro Wallpaper Uygulanıyor..." -ForegroundColor Cyan
+              # Güç ayarları
+              powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
+              powercfg /change standby-timeout-ac 0
+              powercfg /change hibernate-timeout-ac 0
+              powercfg /change monitor-timeout-ac 0
+
+              # Siyah tema
+              Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme" -Value 0 -Type DWord -Force
+              Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "SystemUsesLightTheme" -Value 0 -Type DWord -Force
+              Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+              Start-Sleep -Seconds 2
+              Start-Process explorer.exe -WindowStyle Hidden
+
+              # Wallpaper
+              $wallpaper = "$env:TEMP\retro-vaporwave.png"
+              iwr "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEihU5ELZHXpfukyPseIKOld_KrjmfnmBCqeI0KaPz_O0bnAheFHkUlAtPoQzJxoO5bvif-3iVROvgljui47gteW2BJ3g8d1DwOSg2aKYYwULYVqAZRPCVGJ__MThLnzuVr2MUM24tVI29rK/s1920/13082021-RETRO-HD.png" -OutFile $wallpaper
+              Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "Wallpaper" -Value $wallpaper -Type String -Force
+              Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "WallpaperStyle" -Value 2 -Type String -Force
+              Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "TileWallpaper" -Value 0 -Type String -Force
+              1..5 | ForEach-Object { RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters; Start-Sleep -Milliseconds 500 }
+              Write-Host "✅ Tema ve Wallpaper Tamamlandı!" -ForegroundColor Green
+          }
+
+          function Install-Tailscale {
+              Write-Host "🌐 Tailscale Kuruluyor..." -ForegroundColor Cyan
+              iwr https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi -OutFile t.msi
+              Start-Process msiexec.exe -ArgumentList '/i t.msi /quiet /norestart' -Wait
+              Write-Host "✅ Tailscale Kuruldu!" -ForegroundColor Green
+          }
+
+          function Start-Tailscale {
+              param($authkey)
+              Write-Host "🚀 Tailscale Başlatılıyor..." -ForegroundColor Cyan
+              Start-Process "C:\Program Files\Tailscale\tailscaled.exe" -ArgumentList '--state=mem:' -WindowStyle Hidden
+              Start-Sleep -Seconds 15
+              & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=$authkey --accept-routes --accept-dns=false
+              Write-Host "✅ Tailscale Bağlandı!" -ForegroundColor Green
+
+              while ($true) {
+                  $ip = & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+                  if ($ip) { Write-Host "[$(Get-Date)] Tailscale IP → $ip" -ForegroundColor Yellow }
+                  Start-Sleep -Seconds 300
+              }
+          }
+
+          # Fonksiyonları çağır
+          Enable-RDP
+          Setup-LocaleAndTime
+          Apply-ThemeAndWallpaper
+          Install-Tailscale
+          Start-Tailscale -authkey $env:TAILSCALE_AUTHKEY
